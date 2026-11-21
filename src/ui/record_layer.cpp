@@ -99,7 +99,7 @@ class $modify(PauseLayer) {
 };
 
 $execute{
-    geode::listenForSettingChanges("frame_offset", +[](int64_t value) {
+    geode::listenForSettingChanges<int64_t>("frame_offset", +[](int64_t value) {
         auto& g = Global::get();
         g.frameOffset = value;
 
@@ -111,7 +111,7 @@ $execute{
 
   });
 
-    geode::listenForSettingChanges("background_color", +[](cocos2d::ccColor3B value) {
+    geode::listenForSettingChanges<cocos2d::ccColor3B>("background_color", +[](cocos2d::ccColor3B value) {
         auto& g = Global::get();
         if (g.layer) {
             CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
@@ -129,7 +129,7 @@ void RecordLayer::openSaveMacro(CCObject*) {
 }
 
 void RecordLayer::openLoadMacro(CCObject*) {
-    LoadMacroLayer::open(static_cast<geode::Popup<>*>(this), nullptr);
+    LoadMacroLayer::open(static_cast<XdPopup<>*>(this), nullptr);
 }
 
 RecordLayer* RecordLayer::openMenu(bool instant) {
@@ -159,7 +159,7 @@ RecordLayer* RecordLayer::openMenu(bool instant) {
     layer->m_noElasticity = instant || Global::get().speedhackEnabled;
     layer->show();
 
-    g.layer = static_cast<geode::Popup<>*>(layer);
+    g.layer = static_cast<XdPopup<>*>(layer);
 
     return layer;
 }
@@ -516,7 +516,7 @@ void RecordLayer::onAutosaves(CCObject*) {
     std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("autosaves_folder");
 
     if (std::filesystem::exists(path))
-        LoadMacroLayer::open(static_cast<geode::Popup<>*>(this), nullptr, true);
+        LoadMacroLayer::open(static_cast<XdPopup<>*>(this), nullptr, true);
     else {
         FLAlertLayer::create("Error", "There was an error getting the folder. ID: 5", "Ok")->show();
     }

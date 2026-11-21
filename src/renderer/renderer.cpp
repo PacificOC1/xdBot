@@ -144,20 +144,8 @@ class $modify(CCScheduler) {
 };
 
 bool Renderer::shouldUseAPI() {
-    #ifdef GEODE_IS_WINDOWS
-
-    bool foundApi = Loader::get()->isModLoaded("eclipse.ffmpeg-api");
-    std::filesystem::path ffmpegPath = Mod::get()->getSettingValue<std::filesystem::path>("ffmpeg_path");
-    bool foundExe = std::filesystem::exists(ffmpegPath) && ffmpegPath.filename().string() == "ffmpeg.exe";
-
-    return !foundExe && foundApi;
-
-#else
-
-    return true;
-
-#endif
-
+    // (port) ffmpeg.exe only: the ffmpeg-api wrapper is a stub (see renderer/ffmpeg/events.hpp)
+    return false;
 }
 
 bool Renderer::toggle() {

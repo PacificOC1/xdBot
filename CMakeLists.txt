@@ -46,4 +46,7 @@ endif()
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
+# (port) show every error in a file, not the first 20, so each CI round fixes more
+target_compile_options(${PROJECT_NAME} PRIVATE -ferror-limit=0)
+
 setup_geode_mod(${PROJECT_NAME})

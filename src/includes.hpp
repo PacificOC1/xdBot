@@ -1,6 +1,22 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
+#include <Geode/utils/async.hpp>
+
+// (port) Geode 4's Popup<Args...>: init with the size, then setup(args...). Geode 5's Popup isn't a template.
+template <class... Args>
+class XdPopup : public geode::Popup {
+protected:
+    virtual bool setup(Args... args) = 0;
+
+    bool initAnchored(float width, float height, Args... args, char const* bg = "GJ_square01.png", cocos2d::CCRect bgRect = {}) {
+        if (!geode::Popup::init(width, height, bg, bgRect)) return false;
+        return this->setup(args...);
+    }
+
+public:
+    void onClose(cocos2d::CCObject* sender) override { geode::Popup::onClose(sender); }
+};
 // #include <Geode/loader/SettingEvent.hpp>
 
 #include <string>
@@ -79,7 +95,7 @@ public:
     static PauseLayer* getPauseLayer();
 
     Mod* mod = Mod::get();
-    geode::Popup<>* layer = nullptr;
+    XdPopup<>* layer = nullptr;
 
     Macro macro;
     Renderer renderer;

@@ -953,15 +953,15 @@ void MacroEditLayer::onClear(CCObject*) {
 }
 
 void MacroEditLayer::onMerge(CCObject*) {
-    geode::Popup<>* layer = nullptr;
+    XdPopup<>* layer = nullptr;
     if (Global::get().layer)
-        layer = typeinfo_cast<geode::Popup<>*>(Global::get().layer);
+        layer = typeinfo_cast<XdPopup<>*>(Global::get().layer);
     else {
         CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
         CCObject* child;
         CCARRAY_FOREACH(children, child) {
             if (typeinfo_cast<RecordLayer*>(child)) {
-                layer = typeinfo_cast<geode::Popup<>*>(child);
+                layer = typeinfo_cast<XdPopup<>*>(child);
                 break;
             }
         }
