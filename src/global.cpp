@@ -4,7 +4,6 @@
 #include <Geode/modify/CCTextInputNode.hpp>
 
 #ifdef GEODE_IS_WINDOWS
-#include <geode.custom-keybinds/include/Keybinds.hpp>
 #endif
 
 #include <random>
@@ -186,23 +185,18 @@ int Global::getCurrentFrame(bool editor) {
 }
 
 void Global::updateKeybinds() {
-#ifdef GEODE_IS_WINDOWS
+  // (port) GD's own controls, which custom-keybinds used to report: jump / left / right for P1 then P2
+  static const std::vector<int> defaults[6] = {
+    { KEY_Space, KEY_W }, { KEY_A }, { KEY_D },
+    { KEY_Up }, { KEY_Left }, { KEY_Right }
+  };
 
   auto& g = Global::get();
+  g.allKeybinds.clear();
   for (size_t i = 0; i < 6; i++) {
-    auto keys = keybinds::BindManager::get()->getBindsFor(buttonIDs[i]);
-    std::vector<int> keysInts = {};
-
-    for (size_t j = 0; j < keys.size(); j++) {
-      keysInts.push_back(keys[j]->getHash());
-      g.allKeybinds.insert(keys[j]->getHash());
-    }
-
-    g.keybinds[i].clear();
-    for (int k = 0; k < keysInts.size(); k++)
-      g.keybinds[i].push_back(keysInts[k]);
+    g.keybinds[i] = defaults[i];
+    for (int k : defaults[i]) g.allKeybinds.insert(k);
   }
-#endif
 }
 
 void Global::updateSeed(bool isRestart) {

@@ -1,22 +1,14 @@
 {
-	"geode": "4.4.0",
+	"geode": "5.11.2",
 	"gd": {
-		"win": "2.2074",
-		"android": "2.2074"
+		"win": "2.2081"
 	},
-	"version": "2.4.1",
-	"id": "zilko.xdbot",
-	"name": "xdBot",
+	"version": "v2.5.0-cbf.0",
+	"id": "pacificoc1.xdbot-cbf",
+	"name": "xdBot (CBF fork)",
 	"developer": "Zilko",
-	"description": "Best Free Bot fr",
-	"dependencies": [
-		{
-			"id": "geode.custom-keybinds",
-			"version": ">=v1.10.0",
-			"importance": "required",
-			"platforms": ["win"]
-		}
-	],
+	"description": "Zilko's xdBot, ported to GD 2.2081 with a CBF window counter added",
+	"dependencies": [],
 	"settings": {
 		"button-setting": {
 			"type": "custom:button",
@@ -26,12 +18,16 @@
 			"type": "string",
 			"name": "Accuracy",
 			"default": "Frame Fixes",
-			"one-of": ["Vanilla", "Input Fixes", "Frame Fixes"]
+			"one-of": [
+				"Vanilla",
+				"Input Fixes",
+				"Frame Fixes"
+			]
 		},
 		"frame_offset": {
 			"name": "Frame Offset",
 			"description": "Adds a frame offset when recording or playing macros",
-			"type": "int", 
+			"type": "int",
 			"default": 0,
 			"min": -8,
 			"max": 8
@@ -40,14 +36,13 @@
 			"name": "Button at Endscreen",
 			"description": "Shows the menu button at the endscreen.",
 			"type": "bool",
-			"default": false 
+			"default": false
 		},
 		"ffmpeg_path": {
 			"name": "ffmpeg.exe Path",
 			"description": "The path for ffmpeg.exe, needed to use render.",
 			"type": "file",
-			"default": "",
-			"platforms": ["win"]
+			"default": ""
 		},
 		"macros_folder": {
 			"name": "Macro Save Location",
@@ -65,30 +60,27 @@
 			"default": "{gd_dir}/renders"
 		},
 		"background_color": {
-            "name": "Menu background color",
-            "type": "color",
-            "default": "#334499"
-        },
+			"name": "Menu background color",
+			"type": "color",
+			"default": "#334499"
+		},
 		"editor_keybinds": {
 			"name": "Keybinds on editor",
 			"description": "Enables keybinds while on the level editor.",
 			"type": "bool",
-			"default": false,
-			"platforms": ["win"]
+			"default": false
 		},
 		"disable_keybinds": {
 			"name": "Disable keybinds",
 			"description": "Disables all keybinds.",
 			"type": "bool",
-			"default": false,
-			"platforms": ["win"]
+			"default": false
 		},
 		"recording_only_keybinds": {
 			"name": "Keybinds only while recording",
 			"description": "Keybinds only work while recording a macro.",
 			"type": "bool",
-			"default": false,
-			"platforms": ["win"]
+			"default": false
 		},
 		"level_settings_button": {
 			"name": "Show Button At Settings",
@@ -126,23 +118,114 @@
 			"description": "Locks the delta.",
 			"type": "bool",
 			"default": false
+		},
+		"title-keybinds": {
+			"type": "title",
+			"name": "Keybinds"
+		},
+		"key_open_menu": {
+			"type": "keybind",
+			"name": "Open Menu",
+			"description": "Opens or closes the xdBot menu.",
+			"default": [
+				"Alt+F"
+			],
+			"category": "gameplay"
+		},
+		"key_toggle_recording": {
+			"type": "keybind",
+			"name": "Record macro",
+			"description": "Toggles recording.",
+			"default": [
+				"Alt+G"
+			],
+			"category": "gameplay"
+		},
+		"key_toggle_playing": {
+			"type": "keybind",
+			"name": "Play macro",
+			"description": "Toggles playing.",
+			"default": [
+				"Alt+H"
+			],
+			"category": "gameplay"
+		},
+		"key_toggle_speedhack": {
+			"type": "keybind",
+			"name": "Speedhack",
+			"description": "Toggles speedhack.",
+			"default": [
+				"Alt+S"
+			],
+			"category": "gameplay"
+		},
+		"key_toggle_noclip": {
+			"type": "keybind",
+			"name": "NoClip",
+			"description": "Toggles NoClip.",
+			"default": [
+				"Alt+N"
+			],
+			"category": "gameplay"
+		},
+		"key_toggle_frame_stepper": {
+			"type": "keybind",
+			"name": "Toggle Frame Stepper",
+			"description": "Toggles frame stepper.",
+			"default": [
+				"Alt+C"
+			],
+			"category": "gameplay"
+		},
+		"key_step_frame": {
+			"type": "keybind",
+			"name": "Advance frame",
+			"description": "Advances one frame if frame stepper is on (hold to keep going).",
+			"default": [
+				"V"
+			],
+			"category": "gameplay"
+		},
+		"key_show_trajectory": {
+			"type": "keybind",
+			"name": "Show Trajectory",
+			"description": "Toggles Show Trajectory.",
+			"default": [
+				"Alt+T"
+			],
+			"category": "gameplay"
+		},
+		"key_toggle_render": {
+			"type": "keybind",
+			"name": "Render",
+			"description": "Toggles rendering.",
+			"default": [
+				"Alt+P"
+			],
+			"category": "gameplay"
 		}
 	},
 	"resources": {
-        "sprites": [
-            "resources/GJ_commentSide2_001_White.png",
-            "resources/GJ_commentTop2_001_White.png"
-        ],
+		"sprites": [
+			"resources/GJ_commentSide2_001_White.png",
+			"resources/GJ_commentTop2_001_White.png"
+		],
 		"files": [
-            "resources/default_hold_click.mp3",
-            "resources/default_release_click.mp3",
+			"resources/default_hold_click.mp3",
+			"resources/default_release_click.mp3",
 			"resources/default_hold_left.mp3",
-            "resources/default_release_left.mp3",
-            "resources/default_hold_right.mp3",
-            "resources/default_release_right.mp3"
-        ]
-    },
-	"links": { "source": "https://github.com/ZiLko/xdBot", "community": "https://discord.gg/w6yvdzVzBd" },
-	"tags": ["gameplay", "utility", "cheat"]
-
+			"resources/default_release_left.mp3",
+			"resources/default_hold_right.mp3",
+			"resources/default_release_right.mp3"
+		]
+	},
+	"links": {
+		"source": "https://github.com/PacificOC1/xdBot",
+		"community": "https://discord.gg/w6yvdzVzBd"
+	},
+	"tags": [
+		"gameplay",
+		"utility",
+		"cheat"
+	]
 }
