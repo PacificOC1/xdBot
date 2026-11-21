@@ -196,15 +196,18 @@ class $modify(BGLHook, GJBaseGameLayer) {
     bool macroInput = false;
   };
 
-  void processCommands(float dt) {
+  void processCommands(float dt, bool isHalfTick, bool isLastTick) {
     auto& g = Global::get();
+
+    // (port) 2.2081: half steps only happen with Click Between Steps and aren't a new frame
+    if (isHalfTick) return GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
 
     PlayLayer* pl = PlayLayer::get();
 
     if (!pl) {
       // handlePlaying(Global::getCurrentFrame(true));
       // log::debug("{}", Global::getCurrentFrame(true));
-      return GJBaseGameLayer::processCommands(dt);
+      return GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
     }
 
     Global::updateSeed();
@@ -229,11 +232,11 @@ class $modify(BGLHook, GJBaseGameLayer) {
       }
 
       if (g.previousFrame == frame && frame != 0 && g.macro.xdBotMacro)
-        return GJBaseGameLayer::processCommands(dt);
+        return GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
 
     }
 
-    GJBaseGameLayer::processCommands(dt);
+    GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
 
     if (g.state == state::none)
       return;

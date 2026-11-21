@@ -66,7 +66,7 @@ void RenderSettingsLayer::onDefaults(CCObject*) {
 
 	        CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
             CCObject* child;
-            CCARRAY_FOREACH(children, child) {
+            if (children) for (auto* child : CCArrayExt<CCObject*>(children)) {
                 if (RecordLayer* layer = typeinfo_cast<RecordLayer*>(child)) {
                     layer->onClose(nullptr);
                     break;

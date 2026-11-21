@@ -32,7 +32,7 @@ class $modify(GJBaseGameLayer) {
         
     }
 
-    float getModifiedDelta(float dt) {
+    double getModifiedDelta(float dt) {
         if (!Global::get().tpsEnabled) return GJBaseGameLayer::getModifiedDelta(dt);
         if (Global::getTPS() == 240.f) return GJBaseGameLayer::getModifiedDelta(dt);
         if (!PlayLayer::get()) return GJBaseGameLayer::getModifiedDelta(dt);

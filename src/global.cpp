@@ -330,7 +330,7 @@ void Global::frameStepperOff() {
 PauseLayer* Global::getPauseLayer() {
   CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
   CCObject* child;
-  CCARRAY_FOREACH(children, child) {
+  if (children) for (auto* child : CCArrayExt<CCObject*>(children)) {
     if (PauseLayer* pauseLayer = typeinfo_cast<PauseLayer*>(child))
       return pauseLayer;
   }
