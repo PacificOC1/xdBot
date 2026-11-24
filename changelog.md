@@ -1,4 +1,4 @@
-# v2.5.0-cbf.1 (fork)
+# v2.5.1 (fork)
 
 * Sub-tick stepper (from the Frame Window Counter): steps a frame or a part of one (240 Hz up to 2,400,000,000 Hz), goes back through kept checkpoints, and puts your clicks into the macro where it is, between frames too.
 * Its panel: the macro's clicks as a timeline (select, move earlier / later, delete, undo), play / back, the death marked; a frame that already ran is played again after an edit.
