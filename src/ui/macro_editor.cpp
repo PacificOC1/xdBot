@@ -1,31 +1,11 @@
 #include "macro_editor.hpp"
 #include "record_layer.hpp"
 
-#include <Geode/modify/CCEGLView.hpp>
 #include <Geode/modify/FLAlertLayer.hpp>
 
 MacroEditLayer* editLayer = nullptr;
 
-#ifdef GEODE_IS_WINDOWS
-
-class $modify(CCEGLView) {
-    void onGLFWMouseMoveCallBack(GLFWwindow* v1, double v2, double v3) {
-        CCEGLView::onGLFWMouseMoveCallBack(v1, v2, v3);
-
-        if (!editLayer) return;
-
-        CCScene* scene = CCDirector::get()->getRunningScene();
-        if (MacroEditLayer* layer = scene->getChildByType<MacroEditLayer>(0))
-            editLayer = layer;
-        else
-            return;
-
-        editLayer->updateHover(getMousePos());
-        
-    }
-};
-
-#endif
+// 2.2081: CCEGLView::onGLFWMouseMoveCallBack is inline (can't be hooked), so the editor polls the mouse each frame (pollHover)
 
 class $modify(FLAlertLayer) {
 
@@ -114,6 +94,9 @@ void MacroEditLayer::updateHover(cocos2d::CCPoint pos) {
 }
 
 bool MacroEditLayer::setup() {
+#ifdef GEODE_IS_WINDOWS
+    schedule(schedule_selector(MacroEditLayer::pollHover));
+#endif
     Utils::setBackgroundColor(m_bgSprite);
     
     CCMenu* menu = CCMenu::create();
@@ -890,7 +873,7 @@ void MacroEditLayer::onSave(CCObject*) {
             CCObject* child;
             if (children) for (auto* child : CCArrayExt<CCObject*>(children)) {
                 if (RecordLayer* layer = typeinfo_cast<RecordLayer*>(child)) {
-                    layer->keyBackClicked();
+                    static_cast<CCKeypadDelegate*>(layer)->keyBackClicked();
                     break;
                 }
             }

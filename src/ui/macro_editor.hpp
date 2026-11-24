@@ -70,6 +70,7 @@ public:
     void loadPage(int page);
 
     void updateHover(cocos2d::CCPoint pos);
+    void pollHover(float) { updateHover(getMousePos()); }
 
     void hoverInput(int input);
 

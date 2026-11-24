@@ -715,7 +715,7 @@ void MacroCell::handleLoad() {
 	RecordLayer* newLayer = nullptr;
 
 	if (RecordLayer* layer = typeinfo_cast<RecordLayer*>(menuLayer)) {
-		layer->keyBackClicked();
+		static_cast<CCKeypadDelegate*>(layer)->keyBackClicked();
 		newLayer = RecordLayer::openMenu(true);
 	}
 
