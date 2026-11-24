@@ -141,7 +141,7 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 	file::FilePickOptions::Filter textFilter;
 	file::FilePickOptions fileOptions;
 	textFilter.description = "Macro Files";
-	textFilter.files = { "*.gdr", "*.xd", "*.json" };
+	textFilter.files = { "*.gdr", "*.xd", "*.json", "*.cml" };
 	fileOptions.filters.push_back(textFilter);
 
 	geode::async::spawn(file::pick(file::PickMode::OpenFile, { dirs::getGameDir(), { textFilter } }), [this](file::PickResult res) {
@@ -151,7 +151,23 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 			auto& g = Global::get();
 			Macro tempMacro;
 
-			if (path.extension() == ".xd") {
+			if (path.extension() == ".cml") {
+				// (sub-tick stepper) kept as .cml (its timings between frames stay as they are)
+				std::string err;
+				if (!Macro::loadCMLFile(path, tempMacro, &err))
+					return FLAlertLayer::create("Error", "Couldn't read this .cml macro: " + err, "Ok")->show();
+				std::string stem = path.stem().string();
+				std::filesystem::path folder = Mod::get()->getSettingValue<std::filesystem::path>("macros_folder");
+				std::filesystem::path to = folder / (stem + ".cml");
+				for (int n = 1; std::filesystem::exists(to); ++n) to = folder / fmt::format("{} ({}).cml", stem, n);
+				std::error_code ec;
+				std::filesystem::copy_file(path, to, ec);
+				if (ec) return FLAlertLayer::create("Error", "Couldn't copy the macro: " + ec.message(), "Ok")->show();
+				this->reloadList(0);
+				Notification::create("Macro Imported", NotificationIcon::Success)->show();
+				return;
+			}
+			else if (path.extension() == ".xd") {
 				tempMacro = Macro::XDtoGDR(path);
 
 				if (tempMacro.description == "fail")
@@ -420,7 +436,7 @@ void LoadMacroLayer::addList(bool refresh, float prevScroll) {
 
 	for (int i = invertSort ? macros.size() - 1 : 0; invertSort ? i >= 0 : i < macros.size(); invertSort ? --i : ++i) {
 
-		if (macros[i].extension() != ".gdr" && macros[i].extension() != ".xd" && macros[i].extension() != ".json") continue;
+		if (macros[i].extension() != ".gdr" && macros[i].extension() != ".xd" && macros[i].extension() != ".json" && macros[i].extension() != ".cml") continue;
 
 		std::string name = macros[i].filename().string().substr(0, macros[i].filename().string().find_last_of('.'));
 
@@ -656,7 +672,17 @@ void MacroCell::handleLoad() {
 	Macro newMacro;
 	Macro oldMacro = g.macro;
 
-	if (path.extension() == ".xd") {
+	if (path.extension() == ".cml") {
+		// (sub-tick stepper) xdBot's CML, its timings between frames kept
+		std::string err;
+		if (!Macro::loadCMLFile(path, newMacro, &err)) {
+			if (!isMerge)
+				return FLAlertLayer::create("Error", "Couldn't read this .cml macro: " + err, "Ok")->show();
+			else
+				return;
+		}
+	}
+	else if (path.extension() == ".xd") {
 		if (!Macro::loadXDFile(path)) {
 			if (!isMerge)
 				return FLAlertLayer::create("Error", "There was an error loading this macro. ID: 45", "Ok")->show();

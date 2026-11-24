@@ -36,6 +36,10 @@ add_library(${PROJECT_NAME} SHARED
     src/practice_fixes/input.cpp
     src/practice_fixes/player.cpp
     src/practice_fixes/play_layer.cpp
+
+    src/fwc/Macro.cpp
+    src/stepper/subtick.cpp
+    src/stepper/stepper.cpp
 )
 
 if (NOT DEFINED ENV{GEODE_SDK})

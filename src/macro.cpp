@@ -1,6 +1,9 @@
 #include "includes.hpp"
 #include "ui/record_layer.hpp"
 #include "ui/game_ui.hpp"
+#include "fwc/Macro.hpp"
+
+#include <iterator>
 
 #include <Geode/modify/PlayLayer.hpp>
 
@@ -139,12 +142,12 @@ void Macro::updateTPS() {
     if (g.layer) static_cast<RecordLayer*>(g.layer)->updateTPS();
 }
 
-int Macro::save(std::string author, std::string desc, std::string path, bool json) {
+int Macro::save(std::string author, std::string desc, std::string path, bool json, bool cml) {
     auto& g = Global::get();
 
     if (g.macro.inputs.empty()) return 31;
 
-    std::string extension = json ? ".gdr.json" : ".gdr";
+    std::string extension = cml ? ".cml" : json ? ".gdr.json" : ".gdr";
 
     int iterations = 0;
 
@@ -166,6 +169,13 @@ int Macro::save(std::string author, std::string desc, std::string path, bool jso
     g.macro.author = author;
     g.macro.description = desc;
     g.macro.duration = g.macro.inputs.back().frame / g.macro.framerate;
+
+    // (sub-tick stepper) CML keeps every click's timing between frames, for xdBot 2.7 / the Frame Window Counter too
+    if (cml) {
+        std::wstring wide = Utils::widen(path);
+        if (wide == L"Widen Error") return 30;
+        return Macro::saveCML(g.macro, std::filesystem::path(wide));
+    }
 
     std::wstring widePath = Utils::widen(path);
 
@@ -357,4 +367,72 @@ bool Macro::shouldStep() {
     // }
 
     return false;
+}
+// ---- (sub-tick stepper) CML, through the Frame Window Counter's reader / writer (src/fwc/Macro.cpp) ----
+
+bool Macro::hasSubInputs(Macro const& macro) {
+    for (auto const& in : macro.inputs)
+        if (in.sub > 0) return true;
+    return false;
+}
+
+bool Macro::loadCMLFile(std::filesystem::path path, Macro& out, std::string* error) {
+    std::ifstream f(path, std::ios::binary);
+    if (!f) {
+        if (error) *error = "couldn't open the file";
+        return false;
+    }
+    std::string data((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    auto parsed = fwc::parseCml(data, error);
+    if (!parsed) return false;
+
+    Macro m;
+    m.author = parsed->author;
+    m.description = parsed->description;
+    m.framerate = parsed->framerate > 0 ? static_cast<float>(parsed->framerate) : 240.f;
+    m.duration = static_cast<float>(parsed->duration);
+    m.gameVersion = GEODE_COMP_GD_VERSION;
+    m.botInfo.name = "xdBot"; // (CML frames are counted the way xdBot counts them)
+    m.botInfo.version = parsed->botVersion.empty() ? xdBotVersion : parsed->botVersion;
+    m.levelInfo.name = parsed->macroName;
+    m.xdBotMacro = true;
+    m.inputs.reserve(parsed->inputs.size());
+    for (auto const& in : parsed->inputs) {
+        long long sub = static_cast<long long>(std::clamp(in.sub, 0, 999)) * 10'000 + std::clamp(in.fine, 0, 9'999);
+        m.inputs.push_back(input(in.frame, in.button, in.p2, in.down, std::clamp<long long>(sub, 0, xdstep::kUnits - 1)));
+    }
+    xdstep::sortTimeline(m.inputs);
+    out = std::move(m);
+    return true;
+}
+
+int Macro::saveCML(Macro const& macro, std::filesystem::path path) {
+    fwc::MacroFile m;
+    m.format = "CML v6";
+    m.xdBotStyle = true;
+    m.author = macro.author;
+    m.description = macro.description;
+    m.framerate = macro.framerate;
+    m.duration = macro.duration;
+    m.botName = "xdBot";
+    m.botVersion = macro.botInfo.version.empty() ? xdBotVersion : macro.botInfo.version;
+    m.macroName = macro.levelInfo.name;
+    m.inputs.reserve(macro.inputs.size());
+    for (auto const& in : macro.inputs) {
+        fwc::MacroInput mi;
+        mi.frame = static_cast<int>(in.frame);
+        mi.button = in.button;
+        mi.p2 = in.player2;
+        mi.down = in.down;
+        long long const sub = std::clamp<long long>(in.sub, 0, xdstep::kUnits - 1);
+        mi.sub = static_cast<int>(sub / 10'000);
+        mi.fine = static_cast<int>(sub % 10'000);
+        m.inputs.push_back(mi);
+    }
+    std::string data = fwc::writeCml(m);
+    std::ofstream f(path, std::ios::binary);
+    if (!f) return 20;
+    f.write(data.data(), static_cast<std::streamsize>(data.size()));
+    if (!f) return 21;
+    return 0;
 }

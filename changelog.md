@@ -1,3 +1,11 @@
+# v2.5.0-cbf.1 (fork)
+
+* Sub-tick stepper (from the Frame Window Counter): steps a frame or a part of one (240 Hz up to 2,400,000,000 Hz), goes back through kept checkpoints, and puts your clicks into the macro where it is, between frames too.
+* Its panel: the macro's clicks as a timeline (select, move earlier / later, delete, undo), play / back, the death marked; a frame that already ran is played again after an edit.
+* Clicks between frames play back in xdBot itself (split the way Click Between Frames splits a frame).
+* .cml macros (xdBot 2.7's format) load, import and save, timings between frames kept to 1/1,000,000 of a frame. .gdr keeps them too (a "sub" field).
+* Ported to GD 2.2081 / Geode 5.11.2.
+
 # v2.4.1
 
 * Added Auto Clicker keybind.

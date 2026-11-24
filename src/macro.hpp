@@ -3,6 +3,7 @@
 #include "includes.hpp"
 #include "gdr/gdr.hpp"
 #include "utils/utils.hpp"
+#include "stepper/core.hpp"
 
 using namespace geode::prelude;
 
@@ -22,16 +23,38 @@ enum state {
 };
 
 struct input : gdr::Input {
+    // (sub-tick stepper) how far into the physics after the frame's press point this click lands, in 1/10,000,000 of a
+    // frame (xdstep::kUnits); 0 = a whole-frame click, the way xdBot always recorded and played them
+    long long sub = 0;
+    // (sub-tick stepper) where this click was before the stepper moved it (xdstep::keyOf), xdstep::kNoOrigin = never moved.
+    // Not saved.
+    long long origin = xdstep::kNoOrigin;
+
     input() = default;
 
-    input(int frame, int button, bool player2, bool down)
-        : Input(frame, button, player2, down) {}
+    input(int frame, int button, bool player2, bool down, long long sub = 0)
+        : Input(frame, button, player2, down), sub(sub) {}
 
     bool operator==(const input& other) const {
         return frame == other.frame &&
+               sub == other.sub &&
                player2 == other.player2 &&
                button == other.button &&
                down == other.down;
+    }
+
+    // .gdr / .gdr.json: "sub" = the fraction of a frame (only written when there is one)
+    void parseExtension(gdr::json::object_t obj) override {
+        auto it = obj.find("sub");
+        if (it == obj.end() || !it->second.is_number()) return;
+        double f = it->second.get<double>();
+        if (!(f > 0.0) || !(f < 1.0)) return;
+        sub = std::clamp<long long>(std::llround(f * static_cast<double>(xdstep::kUnits)), 0, xdstep::kUnits - 1);
+    }
+    gdr::json::object_t saveExtension() const override {
+        gdr::json::object_t obj;
+        if (sub > 0) obj["sub"] = static_cast<double>(sub) / static_cast<double>(xdstep::kUnits);
+        return obj;
     }
 };
 
@@ -49,7 +72,7 @@ public:
 
     static void recordFrameFix(int frame, PlayerObject* p1, PlayerObject* p2);
 
-    static int save(std::string author, std::string desc, std::string path, bool json = false);
+    static int save(std::string author, std::string desc, std::string path, bool json = false, bool cml = false);
 
     static void autoSave(GJGameLevel* level, int number);
 
@@ -60,6 +83,14 @@ public:
     static void updateTPS();
 
     static bool loadXDFile(std::filesystem::path path);
+
+    // (sub-tick stepper) xdBot's CML format (versions 1-3, 5-7), with the timings between frames kept. False (and `error`)
+    // if it can't be read.
+    static bool loadCMLFile(std::filesystem::path path, Macro& out, std::string* error = nullptr);
+    // Writes `macro` as CML v6 (every input's timing between frames kept to 1/1,000,000 of a frame). 0 if it worked.
+    static int saveCML(Macro const& macro, std::filesystem::path path);
+    // whether any input sits between two frames
+    static bool hasSubInputs(Macro const& macro);
 
     static Macro XDtoGDR(std::filesystem::path path);
 

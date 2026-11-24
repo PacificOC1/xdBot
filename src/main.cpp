@@ -3,6 +3,7 @@
 #include "ui/record_layer.hpp"
 #include "practice_fixes/practice_fixes.hpp"
 #include "hacks/layout_mode.hpp"
+#include "stepper/stepper.hpp"
 
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
@@ -202,6 +203,13 @@ class $modify(BGLHook, GJBaseGameLayer) {
     // (port) 2.2081: half steps only happen with Click Between Steps and aren't a new frame
     if (isHalfTick) return GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
 
+    // (sub-tick stepper) while it's on, it presses the macro's clicks itself (xdBot's recording / playing wait)
+    if (xdstep::stepperOn()) {
+      GJBaseGameLayer::processCommands(dt, isHalfTick, isLastTick);
+      if (static_cast<GJBaseGameLayer*>(PlayLayer::get()) == this) xdstep::stepperAfterCommands(this);
+      return;
+    }
+
     PlayLayer* pl = PlayLayer::get();
 
     if (!pl) {
@@ -329,10 +337,15 @@ class $modify(BGLHook, GJBaseGameLayer) {
       auto input = g.macro.inputs[g.currentAction];
 
       if (frame != g.respawnFrame) {
-        if (Macro::flipControls())
-          input.player2 = !input.player2;
+        // (sub-tick stepper) a click between frames: pressed from inside the coming physics (stepper/subtick.cpp)
+        if (input.sub > 0)
+          xdstep::arm(input);
+        else {
+          if (Macro::flipControls())
+            input.player2 = !input.player2;
 
-        GJBaseGameLayer::handleButton(input.down, input.button, input.player2);
+          GJBaseGameLayer::handleButton(input.down, input.button, input.player2);
+        }
       }
 
       g.currentAction++;
@@ -384,6 +397,10 @@ class $modify(BGLHook, GJBaseGameLayer) {
   void handleButton(bool hold, int button, bool player2) {
     auto& g = Global::get();
 
+    // (sub-tick stepper) your clicks go on the macro's timeline where the stepper is (its own presses go through)
+    if (xdstep::stepperOn() && xdstep::sub().pressing == 0 && xdstep::stepperTakeClick(hold, button, player2))
+      return;
+
     if (g.p2mirror && m_gameState.m_isDualMode && !g.autoclicker) {
       GJBaseGameLayer::handleButton(g.mod->getSavedValue<bool>("p2_input_mirror_inverted") ? !hold : hold, button, !player2);
     }
@@ -392,7 +409,7 @@ class $modify(BGLHook, GJBaseGameLayer) {
       return GJBaseGameLayer::handleButton(hold, button, player2);
 
     if (g.state == state::playing) {
-      if (g.mod->getSavedValue<bool>("macro_ignore_inputs") && !m_fields->macroInput)
+      if (g.mod->getSavedValue<bool>("macro_ignore_inputs") && !m_fields->macroInput && xdstep::sub().pressing == 0)
         return;
       else return GJBaseGameLayer::handleButton(hold, button, player2);
 

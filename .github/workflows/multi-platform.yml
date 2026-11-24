@@ -27,6 +27,17 @@ jobs:
           combine: true
           target: ${{ matrix.config.target }}
 
+  # the sub-tick stepper's timeline and the CML reader / writer, without the game (tests/run.sh)
+  tests:
+    name: Host tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build and run the host tests
+        run: tests/run.sh
+
   package:
     name: Package builds
     runs-on: ubuntu-latest

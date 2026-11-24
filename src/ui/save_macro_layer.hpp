@@ -8,6 +8,7 @@ class SaveMacroLayer : public XdPopup<> {
     TextInput* nameInput = nullptr;
 
     CCMenuItemToggler* jsonToggle = nullptr;
+    CCMenuItemToggler* cmlToggle = nullptr;
 
 private:
 
@@ -65,6 +66,20 @@ private:
         lbl->setScale(0.375);
         menu->addChild(lbl);
 
+        // (sub-tick stepper) .cml: on by default when the macro has clicks between frames
+        spriteOn = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
+        spriteOff = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
+        cmlToggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, nullptr);
+        cmlToggle->setPosition({ 70, -78 });
+        cmlToggle->setScale(0.575);
+        cmlToggle->toggle(Macro::hasSubInputs(Global::get().macro) || Mod::get()->getSavedValue<bool>("save_as_cml"));
+        menu->addChild(cmlToggle);
+
+        lbl = CCLabelBMFont::create("CML", "bigFont.fnt");
+        lbl->setPosition({ 94, -77.5 });
+        lbl->setScale(0.375);
+        menu->addChild(lbl);
+
         return true;
     }
 
@@ -97,7 +112,9 @@ public:
         std::string author = authorInput->getString();
         std::string desc = descInput->getString();
 
-        int result = Macro::save(author, desc, path.string(), jsonToggle->isToggled());
+        bool const cml = cmlToggle && cmlToggle->isToggled();
+        Mod::get()->setSavedValue("save_as_cml", cml);
+        int result = Macro::save(author, desc, path.string(), jsonToggle->isToggled(), cml);
 
         if (result != 0)
             return FLAlertLayer::create("Error", "There was an error saving the macro. ID: " + std::to_string(result), "Ok")->show();

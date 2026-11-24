@@ -3,11 +3,11 @@
 	"gd": {
 		"win": "2.2081"
 	},
-	"version": "v2.5.0-cbf.0",
+	"version": "v2.5.0-cbf.1",
 	"id": "pacificoc1.xdbot-cbf",
 	"name": "xdBot (CBF fork)",
 	"developer": "Zilko",
-	"description": "Zilko's xdBot, ported to GD 2.2081 with a CBF window counter added",
+	"description": "Zilko's xdBot, ported to GD 2.2081, with a sub-tick stepper and clicks between frames (kept in .cml)",
 	"dependencies": [],
 	"settings": {
 		"button-setting": {
@@ -203,6 +203,180 @@
 				"Alt+P"
 			],
 			"category": "gameplay"
+		},
+		"title-stepper": {
+			"type": "title",
+			"name": "Sub-tick stepper"
+		},
+		"key_stepper_toggle": {
+			"type": "keybind",
+			"name": "Stepper on / off",
+			"description": "Turns the sub-tick stepper on or off in a level (also in the pause menu). While it's on, the level only moves when you step it, and your clicks go into the macro where the stepper is.",
+			"default": [
+				"Alt+V"
+			],
+			"category": "gameplay"
+		},
+		"key_stepper_tick": {
+			"type": "keybind",
+			"name": "Stepper: next frame",
+			"description": "Runs one frame. Hold it to keep going (60 frames a second).",
+			"default": [
+				"C"
+			],
+			"category": "gameplay"
+		},
+		"key_stepper_tick_back": {
+			"type": "keybind",
+			"name": "Stepper: frame back",
+			"description": "Back one frame (to a checkpoint the stepper kept).",
+			"default": [
+				"B"
+			],
+			"category": "gameplay"
+		},
+		"key_stepper_fine": {
+			"type": "keybind",
+			"name": "Stepper: small step",
+			"description": "Moves one small step inside the frame (Stepper: steps a second). A click placed there lands that far into the frame.",
+			"default": [
+				"Shift+C"
+			],
+			"category": "gameplay"
+		},
+		"key_stepper_fine_back": {
+			"type": "keybind",
+			"name": "Stepper: small step back",
+			"description": "One small step back.",
+			"default": [
+				"Shift+B"
+			],
+			"category": "gameplay"
+		},
+		"key_stepper_hold": {
+			"type": "keybind",
+			"name": "Stepper: press / let go of jump",
+			"description": "Presses jump where the stepper is, or lets go of it if it's held there.",
+			"default": [
+				"H"
+			],
+			"category": "gameplay"
+		},
+		"key_stepper_play": {
+			"type": "keybind",
+			"name": "Stepper: play / stop",
+			"description": "Plays the macro from here at the game's speed (stops at a death).",
+			"default": [
+				"P"
+			],
+			"category": "gameplay"
+		},
+		"key_stepper_return": {
+			"type": "keybind",
+			"name": "Stepper: back to where play started",
+			"description": "Goes back to where you last pressed play.",
+			"default": [
+				"Shift+P"
+			],
+			"category": "gameplay"
+		},
+		"key_stepper_pull": {
+			"type": "keybind",
+			"name": "Stepper: next click here",
+			"description": "Moves the next click of the macro to where the stepper is.",
+			"default": [
+				"N"
+			],
+			"category": "gameplay"
+		},
+		"key_stepper_delete": {
+			"type": "keybind",
+			"name": "Stepper: delete next click",
+			"description": "Takes the next click of the macro out.",
+			"default": [
+				"Delete"
+			],
+			"category": "gameplay"
+		},
+		"key_stepper_undo": {
+			"type": "keybind",
+			"name": "Stepper: undo",
+			"description": "Undoes the last edit of the macro's clicks.",
+			"default": [
+				"Ctrl+Z"
+			],
+			"category": "gameplay"
+		},
+		"key_stepper_finer": {
+			"type": "keybind",
+			"name": "Stepper: finer steps",
+			"description": "Smaller steps: 240, 2,400, 24,000 ... up to 2,400,000,000 Hz.",
+			"default": [
+				"PageUp"
+			],
+			"category": "gameplay"
+		},
+		"key_stepper_coarser": {
+			"type": "keybind",
+			"name": "Stepper: coarser steps",
+			"description": "Bigger steps.",
+			"default": [
+				"PageDown"
+			],
+			"category": "gameplay"
+		},
+		"key_stepper_mark": {
+			"type": "keybind",
+			"name": "Stepper: mark",
+			"description": "Marks the last press (or where the stepper is): two marks give the window between them.",
+			"default": [
+				"M"
+			],
+			"category": "gameplay"
+		},
+		"stepper_hz": {
+			"type": "int",
+			"name": "Stepper: steps a second",
+			"description": "How finely the stepper splits a frame: 2400 = steps of 0.1 frame at 240 TPS. GD's float timing makes the very finest steps stop mattering (one float step of 1/240 s is about 1e-7 frame).",
+			"default": 2400,
+			"min": 240,
+			"max": 2400000000
+		},
+		"stepper_deaths": {
+			"type": "string",
+			"name": "Stepper: deaths",
+			"description": "Stop in front of a frame that kills the player (it's undone), or go through it like noclip.",
+			"default": "Stop before the death",
+			"one-of": [
+				"Stop before the death",
+				"Go through (noclip)"
+			]
+		},
+		"stepper_back": {
+			"type": "int",
+			"name": "Stepper: frames you can go back",
+			"description": "A checkpoint is kept before every frame the stepper runs, this many at most. More uses more memory.",
+			"default": 1200,
+			"min": 10,
+			"max": 20000
+		},
+		"stepper_panel": {
+			"type": "bool",
+			"name": "Stepper: panel",
+			"description": "The panel at the bottom: buttons, and the macro's clicks as a timeline you can select, move and delete.",
+			"default": true
+		},
+		"stepper_ghost": {
+			"type": "bool",
+			"name": "Stepper: ghost",
+			"description": "An outline where the player will be at the stepper's spot inside the coming frame.",
+			"default": true
+		},
+		"stepper_trajectory_boxes": {
+			"type": "bool",
+			"name": "Stepper: hitboxes on the trajectory",
+			"description": "With Show Trajectory on (the panel's Path button), the player's hitbox along the hold path.",
+			"default": true
 		}
 	},
 	"resources": {
